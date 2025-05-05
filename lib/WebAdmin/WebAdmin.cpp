@@ -20,15 +20,22 @@ void WebAdmin::begin()
     ESPUI.addControl(ControlType::Separator, "Sensor settings");
     this->addControl(
         ControlType::Number, 
-        "Distance to sensor when \"empty\" (cm)", 
-        this->storage->getParameter(Parameter::DISTANCE_EMPTY, "2"),
+        "Sensor range (m)", 
+        this->storage->getParameter(Parameter::SENSOR_RANGE, "5"),
+        Control::noParent,
+        Parameter::SENSOR_RANGE
+    );
+    this->addControl(
+        ControlType::Number, 
+        "Distance from bottom to sensor (cm)", 
+        this->storage->getParameter(Parameter::DISTANCE_EMPTY, "10"),
         Control::noParent,
         Parameter::DISTANCE_EMPTY
     );
     this->addControl(
         ControlType::Number, 
-        "Distance to sensor when \"full\" (cm)", 
-        this->storage->getParameter(Parameter::DISTANCE_FULL, "1"),
+        "Maximum water depth (cm)", 
+        this->storage->getParameter(Parameter::DISTANCE_FULL, "100"),
         Control::noParent,
         Parameter::DISTANCE_FULL
     );

@@ -9,13 +9,13 @@ This project was inspired by [WaterLevelSensorMQTT](https://github.com/portfedh/
 
 * NodeMCU ESP8266 Development Board ~4EUR
   * Recommend buying the one with built-in 0.96in display
-* Any analog sensor, I used SWK-LT100
-* 4-20mA to 3V3 signal converter or 0-10V signal converter
+* Any analog sensor, I used SWK-LT100 ~40EUR
+* 4-20mA to 3V3 signal converter or 0-10V signal converter ~3EUR
 
 ![ESP8266](./doc/nodemcu.png)
 ![JSN-SR04T](./doc/sensor.png)
 
-Signal converters
+4-20mA to 0-3V3 signal converters
 
 ![](./doc/signal_converter_1.png)
 ![](./doc/signal_converter_2.png)

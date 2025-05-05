@@ -3,21 +3,26 @@
 
 #include <Arduino.h>
 #include "Logger.h"
+#include "Storage.h"
 
 class Meter
 {
     private:
-        static constexpr int TRIG_PIN = D1;
-        static constexpr int ECHO_PIN = D2;
-        static constexpr float ABSOLUTE_TEMP = 273.16;
-        static constexpr float CURRENT_TEMP = 15.0;
+        static constexpr int ANALOG_PIN = A0;
+        static constexpr float VOLTAGE_REF = 3.3;
+        
+        static constexpr float MIN_CURRENT_MA = 4.0; 
+        static constexpr float MAX_CURRENT_MA = 20.0;
 
-        double speedOfSound;
         Logger* logger;
+        Storage* storage;
 
     public:
-        Meter(Logger* logger);
+        Meter(Logger* logger, Storage* storage);
         float measure();
+        
+    private:
+        float voltageToDistance(float voltage);
 };
 
 #endif

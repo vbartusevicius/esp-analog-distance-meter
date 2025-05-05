@@ -13,11 +13,13 @@ char* Parameter::MQTT_TOPIC_DISTANCE = "mqtt_topic_distance";
 char* Parameter::AVG_SAMPLE_COUNT = "avg_sample_count";
 char* Parameter::SAMPLING_INTERVAL = "sampling_interval";
 char* Parameter::MAXIMUM_DISTANCE_DELTA = "max_distance_delta";
+char* Parameter::SENSOR_RANGE = "sensor_range";
 
 vector<char*> Parameter::REQUIRED_PARAMS = {
     Parameter::DISTANCE_EMPTY,
     Parameter::DISTANCE_FULL,
     Parameter::MQTT_HOST,
     Parameter::MQTT_PORT,
-    Parameter::MQTT_DEVICE
+    Parameter::MQTT_DEVICE,
+    Parameter::SENSOR_RANGE
 };

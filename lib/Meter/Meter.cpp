@@ -1,31 +1,34 @@
 #include "Meter.h"
+#include "Parameter.h"
 
-Meter::Meter(Logger* logger)
+Meter::Meter(Logger* logger, Storage* storage)
 {
     this->logger = logger;
-    this->speedOfSound = 331.3 * sqrt(1 + (Meter::CURRENT_TEMP / Meter::ABSOLUTE_TEMP));
-
-    pinMode(Meter::TRIG_PIN, OUTPUT);
-    pinMode(Meter::ECHO_PIN, INPUT_PULLUP);
+    this->storage = storage;
+    
+    pinMode(Meter::ANALOG_PIN, INPUT);
 }
 
 /*
- * returns the measured distance from the sensor to the column in meters
+ * returns the measured distance from the sensor in meters
  */
 float Meter::measure()
 {
-    digitalWrite(Meter::TRIG_PIN, LOW);
-    delayMicroseconds(2);
+    int rawValue = analogRead(Meter::ANALOG_PIN);   
+    float voltage = (rawValue / 1023.0) * Meter::VOLTAGE_REF;
 
-    digitalWrite(Meter::TRIG_PIN, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(Meter::TRIG_PIN, LOW);
+    float distance = voltageToDistance(voltage);
+    
+    this->logger->info("Measurement taken. Raw: " + String(rawValue) + ", Voltage: " + String(voltage) + "V, Distance: " + String(distance) + "m.");
 
-    unsigned long pulse = pulseIn(Meter::ECHO_PIN, HIGH, 100000);
-    double timeTook = (double) pulse / 1000000; // time in seconds
-    float distance = this->speedOfSound * timeTook / 2;
+    return distance;
+}
 
-    this->logger->info("Measurement taken. distance: " + String(distance) + "m.");
-
+float Meter::voltageToDistance(float voltage)
+{
+    float sensorRange = atof(this->storage->getParameter(Parameter::SENSOR_RANGE, "5").c_str());
+    float current = Meter::MIN_CURRENT_MA + (voltage / Meter::VOLTAGE_REF) * (Meter::MAX_CURRENT_MA - Meter::MIN_CURRENT_MA);
+    float distance = ((current - Meter::MIN_CURRENT_MA) / (Meter::MAX_CURRENT_MA - Meter::MIN_CURRENT_MA)) * sensorRange;
+    
     return distance;
 }

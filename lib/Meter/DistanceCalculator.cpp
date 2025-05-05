@@ -6,23 +6,23 @@ DistanceCalculator::DistanceCalculator(Storage* storage)
     this->storage = storage;
 }
 /*
- * returns absolute height of measured column in meters
+ * returns absolute height of water column in meters
  */
-float DistanceCalculator::getAbsolute(float distance)
+float DistanceCalculator::getAbsolute(float sensorToWaterDistance)
 {
-    float distanceEmpty = atof(this->storage->getParameter(Parameter::DISTANCE_EMPTY).c_str()) / 100;
-    float absolute = distanceEmpty - distance;
+    float sensorHeightFromBottom = atof(this->storage->getParameter(Parameter::DISTANCE_EMPTY).c_str()) / 100;
+    float waterLevel = sensorHeightFromBottom - sensorToWaterDistance;
 
-    return (absolute < 0) ? 0.0 : absolute; 
+    return (waterLevel < 0) ? 0.0 : waterLevel; 
 }
 
 /*
- * returns relative height of measured column in percentage fraction
+ * returns relative height of water column in percentage fraction (0.0 - 1.0)
  */
-float DistanceCalculator::getRelative(float distance)
+float DistanceCalculator::getRelative(float sensorToWaterDistance)
 {
-    float distanceEmpty = atof(this->storage->getParameter(Parameter::DISTANCE_EMPTY).c_str()) / 100;
-    float distanceFull = atof(this->storage->getParameter(Parameter::DISTANCE_FULL).c_str()) / 100;
-
-    return this->getAbsolute(distance) / (distanceEmpty - distanceFull);
+    float maxWaterDepth = atof(this->storage->getParameter(Parameter::DISTANCE_FULL).c_str()) / 100;
+    float currentWaterLevel = this->getAbsolute(sensorToWaterDistance);
+    
+    return (maxWaterDepth > 0) ? (currentWaterLevel / maxWaterDepth) : 0.0;
 }

@@ -18,6 +18,7 @@ class Parameter
         static char* AVG_SAMPLE_COUNT;
         static char* SAMPLING_INTERVAL;
         static char* MAXIMUM_DISTANCE_DELTA;
+        static char* SENSOR_RANGE;
 
         static vector<char*> REQUIRED_PARAMS;
 };
