@@ -26,37 +26,39 @@ Final result
 
 ## Setup
 
-1. Connect the sensor's `TRIG` pin to `D1` and `ECHO` pin to `D2`. Take 5V from the `VU` pin. Connect `Ground` to any `G` pin.
-1. Optional 128x64 OLED display can be connected - `D5` as `SCL` and `D6` as `SDA`. With abuilt-in display it works out of the box.
-1. At first, the `WiFiManager` will set up an AccessPoint, connect to `ESP_distance_meter` WiFi, and the configure connection to your local network. Restart the NodeMCU when done.
-1. Navigate with the browser to the device's IP address. It is displayed on the LCD or printed to Serial.
-1. Enter all needed parameters in the admin dashboard.
+1. Connect the analog sensor output to the signal converter, and connect the converter's output to the `A0` pin on the ESP8266. Power the sensor according to its specifications.
+2. Optional 128x64 OLED display can be connected - `D5` as `SCL` and `D6` as `SDA`. With a built-in display it works out of the box.
+3. At first, the `WiFiManager` will set up an AccessPoint, connect to `ESP_distance_meter` WiFi, and then configure connection to your local network. Restart the NodeMCU when done.
+4. Navigate with the browser to the device's IP address. It is displayed on the LCD or printed to Serial.
+5. Enter all needed parameters in the admin dashboard.
 
 ![Admin](./doc/admin_dashboard.png)
 
-### Configuring distances
+### Configuring the analog sensor
 
-The meter has to know some heights in advance; it uses them to calculate the percentage filled or absolute column height.
+The meter needs to know several parameters to correctly interpret the analog readings:
 
-#### Distance to sensor when "empty"
+#### Sensor range (m)
 
-Provide the distance in centimeters from the bottom or your defined minimum of "something" to the sensor.
-It means that at this distance the container is "empty".
+The maximum range of your physical sensor in meters (e.g., 5 for a 0-5m sensor). This defines the mapping between the 4-20mA current (or 0-10V voltage) and the actual distance.
 
-#### Distance to sensor when "full"
+#### Distance from bottom to sensor (cm)
 
-Provide the distance in centimeters from the top or your defined maximum of "something" to the sensor.
-It means that at this distance the container is "full".
+The height at which the sensor is installed, measured from the bottom of the tank/container in centimeters. This allows the system to calculate the actual water level.
+
+#### Maximum water depth (cm)
+
+The maximum possible water depth in your tank/container in centimeters. This is used to calculate the percentage full.
 
 ## Measurements
 
-HomeAssintant's autoconfiguration message is published to MQTT. You should be able to find the Entity under MQTT integration.
+HomeAssistant's autoconfiguration message is published to MQTT. You should be able to find the Entity under MQTT integration.
 
 By default, the current state will be published to the `esp_distance_meter/stat/distance` topic. It contains a JSON with the following structure:
 
 * `relative` - a percentage of how much the container is filled.
-* `absolute` - calculated height in meters of "something" in the container.
-* `measured` - a raw distance measured in meters from the sensor to the surface.
+* `absolute` - calculated height in meters of water in the container.
+* `measured` - the raw distance measured in meters from the sensor to the water surface.
 
 ```json
 {
@@ -66,4 +68,4 @@ By default, the current state will be published to the `esp_distance_meter/stat/
 }
 ```
 
-The example above shows that the container is filled to 73%, and the height of something is 1.12 meters. The raw measured distance from the sensor to something is 1.51 meters.
+The example above shows that the container is filled to 73%, and the height of water is 1.12 meters. The raw measured distance from the sensor to the water surface is 1.51 meters.
