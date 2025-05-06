@@ -13,16 +13,21 @@ class Meter
         
         static constexpr float MIN_CURRENT_MA = 4.0; 
         static constexpr float MAX_CURRENT_MA = 20.0;
+        static constexpr float FAULT_CURRENT_MA = 3.5;
 
         Logger* logger;
         Storage* storage;
+        bool sensorConnected = false;
 
     public:
         Meter(Logger* logger, Storage* storage);
         float measure();
+        bool checkSensorConnection();
         
     private:
+        bool isSensorConnected(float voltage);
         float voltageToDistance(float voltage);
+        float voltageToCurrentMA(float voltage);
 };
 
 #endif

@@ -6,19 +6,17 @@ Stats::Stats() {}
 
 void Stats::updateStats(
     float measurement, 
-    float distance, 
-    bool mqttConnected
+    float distance,
+    float absoluteDistance,
+    bool mqttConnected,
+    bool sensorConnected
 )
 {
     this->measurement = measurement;
     this->fractionalDistance = distance;
+    this->absoluteDistance = absoluteDistance;
     this->mqttConnected = mqttConnected;
-
-    if (measurement > 0.0) {
-        this->sensorConnected = true;
-    } else {
-        this->sensorConnected = false;
-    }
+    this->sensorConnected = sensorConnected;
 
     this->ipAddress = String(WiFi.localIP().toString());
     this->network = String(WiFi.SSID());

@@ -15,17 +15,14 @@ class Stats
         String relativeDistance = "";
         float fractionalDistance = 0.0;
         float measurement = 0.0;
+        float absoluteDistance = 0.0;
 
         bool mqttConnected = false;
         bool sensorConnected = false;
 
     public:
         Stats();
-        void updateStats(
-            float measurement, 
-            float relativeDistance, 
-            bool mqttConnected
-        );
+        void updateStats(float measurement, float distance, float absoluteDistance, bool mqttConnected, bool sensorConnected);
 };
 
 #endif

@@ -33,6 +33,14 @@ void Logger::error(String message)
     log.errorln(buffer);
 }
 
+void Logger::debug(String message)
+{
+    char buffer[255];
+    this->formatMessage(message.c_str(), "DEBUG", buffer);
+
+    log.verboseln(buffer);
+}
+
 vector<String> Logger::getBuffer()
 {
     return this->buffer;
