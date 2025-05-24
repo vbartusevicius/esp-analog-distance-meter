@@ -1,3 +1,6 @@
+#define WEBSERVER_H
+#define ASYNCWEBSERVER_DONT_REDEFINE_ENUMS
+
 #include "WifiConnector.h"
 
 #include <Arduino.h>

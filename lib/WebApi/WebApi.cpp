@@ -56,82 +56,109 @@ void WebApi::setupApiEndpoints() {
         this->logger->info("Configuration sent to client");
     });
 
-    AsyncCallbackJsonWebHandler* saveConfigHandler = new AsyncCallbackJsonWebHandler(
-        "/api/v1/config", 
-        [this](AsyncWebServerRequest *request, JsonVariant &json) {
-            JsonObject jsonObj = json.as<JsonObject>();
-            
-            if (jsonObj.containsKey("sensor_range")) {
-                String value = jsonObj["sensor_range"].as<String>();
-                this->storage->saveParameter(Parameter::SENSOR_RANGE, value);
-            }
-            
-            if (jsonObj.containsKey("distance_empty")) {
-                String value = jsonObj["distance_empty"].as<String>();
-                this->storage->saveParameter(Parameter::DISTANCE_EMPTY, value);
-            }
-            
-            if (jsonObj.containsKey("distance_full")) {
-                String value = jsonObj["distance_full"].as<String>();
-                this->storage->saveParameter(Parameter::DISTANCE_FULL, value);
-            }
-            
-            if (jsonObj.containsKey("avg_sample_count")) {
-                String value = jsonObj["avg_sample_count"].as<String>();
-                this->storage->saveParameter(Parameter::AVG_SAMPLE_COUNT, value);
-            }
-            
-            if (jsonObj.containsKey("sampling_interval")) {
-                String value = jsonObj["sampling_interval"].as<String>();
-                this->storage->saveParameter(Parameter::SAMPLING_INTERVAL, value);
-            }
-            
-            if (jsonObj.containsKey("maximum_distance_delta")) {
-                String value = jsonObj["maximum_distance_delta"].as<String>();
-                this->storage->saveParameter(Parameter::MAXIMUM_DISTANCE_DELTA, value);
-            }
-            
-            if (jsonObj.containsKey("mqtt_host")) {
-                String value = jsonObj["mqtt_host"].as<String>();
-                this->storage->saveParameter(Parameter::MQTT_HOST, value);
-            }
-            
-            if (jsonObj.containsKey("mqtt_port")) {
-                String value = jsonObj["mqtt_port"].as<String>();
-                this->storage->saveParameter(Parameter::MQTT_PORT, value);
-            }
-            
-            if (jsonObj.containsKey("mqtt_user")) {
-                String value = jsonObj["mqtt_user"].as<String>();
-                this->storage->saveParameter(Parameter::MQTT_USER, value);
-            }
-            
-            if (jsonObj.containsKey("mqtt_pass")) {
-                String value = jsonObj["mqtt_pass"].as<String>();
-                this->storage->saveParameter(Parameter::MQTT_PASS, value);
-            }
-            
-            if (jsonObj.containsKey("mqtt_device")) {
-                String value = jsonObj["mqtt_device"].as<String>();
-                this->storage->saveParameter(Parameter::MQTT_DEVICE, value);
-            }
-            
-            this->logger->info("Configuration saved");
-            request->send(200, "application/json", "{\"status\":\"ok\"}");
+    server.on("/api/v1/config", HTTP_POST, [](AsyncWebServerRequest *request) {}, 
+    nullptr,
+    [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        // Handle the JSON POST data
+        if (index == 0) {
+            // If this is the first chunk, create a new buffer
+            request->_tempObject = malloc(total);
         }
-    );
-    saveConfigHandler->setMethod(HTTP_POST);
-
-    server.addHandler(saveConfigHandler);
+        
+        // Copy this chunk of data to our buffer
+        memcpy((uint8_t*)request->_tempObject + index, data, len);
+        
+        if (index + len == total) {
+            // This is the last chunk, process the complete JSON
+            char* jsonData = (char*)request->_tempObject;
+            jsonData[total] = '\0'; // Null terminate
+            
+            DynamicJsonDocument jsonDoc(1024);
+            DeserializationError error = deserializeJson(jsonDoc, jsonData);
+            
+            if (!error) {
+                JsonObject jsonObj = jsonDoc.as<JsonObject>();
+                
+                if (jsonObj.containsKey("sensor_range")) {
+                    String value = jsonObj["sensor_range"].as<String>();
+                    this->storage->saveParameter(Parameter::SENSOR_RANGE, value);
+                }
+                
+                if (jsonObj.containsKey("distance_empty")) {
+                    String value = jsonObj["distance_empty"].as<String>();
+                    this->storage->saveParameter(Parameter::DISTANCE_EMPTY, value);
+                }
+                
+                if (jsonObj.containsKey("distance_full")) {
+                    String value = jsonObj["distance_full"].as<String>();
+                    this->storage->saveParameter(Parameter::DISTANCE_FULL, value);
+                }
+                
+                if (jsonObj.containsKey("avg_sample_count")) {
+                    String value = jsonObj["avg_sample_count"].as<String>();
+                    this->storage->saveParameter(Parameter::AVG_SAMPLE_COUNT, value);
+                }
+                
+                if (jsonObj.containsKey("sampling_interval")) {
+                    String value = jsonObj["sampling_interval"].as<String>();
+                    this->storage->saveParameter(Parameter::SAMPLING_INTERVAL, value);
+                }
+                
+                if (jsonObj.containsKey("maximum_distance_delta")) {
+                    String value = jsonObj["maximum_distance_delta"].as<String>();
+                    this->storage->saveParameter(Parameter::MAXIMUM_DISTANCE_DELTA, value);
+                }
+                
+                if (jsonObj.containsKey("mqtt_host")) {
+                    String value = jsonObj["mqtt_host"].as<String>();
+                    this->storage->saveParameter(Parameter::MQTT_HOST, value);
+                }
+                
+                if (jsonObj.containsKey("mqtt_port")) {
+                    String value = jsonObj["mqtt_port"].as<String>();
+                    this->storage->saveParameter(Parameter::MQTT_PORT, value);
+                }
+                
+                if (jsonObj.containsKey("mqtt_user")) {
+                    String value = jsonObj["mqtt_user"].as<String>();
+                    this->storage->saveParameter(Parameter::MQTT_USER, value);
+                }
+                
+                if (jsonObj.containsKey("mqtt_pass")) {
+                    String value = jsonObj["mqtt_pass"].as<String>();
+                    this->storage->saveParameter(Parameter::MQTT_PASS, value);
+                }
+                
+                if (jsonObj.containsKey("mqtt_device")) {
+                    String value = jsonObj["mqtt_device"].as<String>();
+                    this->storage->saveParameter(Parameter::MQTT_DEVICE, value);
+                }
+                
+                this->logger->info("Configuration saved");
+                request->send(200, "application/json", "{\"status\":\"ok\"}");
+            } else {
+                this->logger->error("Failed to parse JSON");
+                request->send(400, "application/json", "{\"status\":\"error\",\"message\":\"Invalid JSON\"}");
+            }
+            
+            // Free the buffer
+            free(request->_tempObject);
+        }
+    });
 
     server.on("/api/v1/status", HTTP_GET, [this](AsyncWebServerRequest *request) {
         AsyncResponseStream *response = request->beginResponseStream("application/json");
         DynamicJsonDocument doc(512);
         
-        doc["water_level"] = absoluteDistance;
-        doc["water_percent"] = relativeDistance;
-        doc["measured_distance"] = measuredDistance;
-        doc["mqtt_connected"] = mqttConnected;
+        doc["water_level"] = this->currentStats->absoluteDistance;
+        doc["water_percent"] = this->currentStats->relativeDistance;
+        doc["measured_distance"] = this->currentStats->measurement;
+        doc["mqtt_connected"] = this->currentStats->mqttConnected;
+        doc["wifi_network"] = this->currentStats->network;
+        doc["wifi_signal"] = this->currentStats->wifiSignal;
+        doc["ip_address"] = this->currentStats->ipAddress;
+        doc["uptime"] = this->currentStats->uptime;
+        doc["sensor_connected"] = this->currentStats->sensorConnected;
         
         serializeJson(doc, *response);
         request->send(response);
@@ -176,7 +203,14 @@ void WebApi::setupWebSocket() {
 void WebApi::handleWebSocketMessage(AsyncWebSocketClient* client, void* arg, uint8_t* data, size_t len, Stats* stats) {
     AwsFrameInfo *info = (AwsFrameInfo*)arg;
     if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-        String message = String((char*)data, len);
+        // Create a properly null-terminated C-string from the WebSocket data
+        char* cstr = new char[len + 1];
+        memcpy(cstr, data, len);
+        cstr[len] = 0;
+        
+        // Now safely convert to String
+        String message = String(cstr);
+        delete[] cstr; // Clean up
         
         DynamicJsonDocument doc(512);
         DeserializationError error = deserializeJson(doc, message);

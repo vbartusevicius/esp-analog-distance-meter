@@ -56,7 +56,7 @@ void MqttClient::begin()
 
 void MqttClient::publishHomeAssistantAutoconfig()
 {
-    JsonDocument doc;
+    DynamicJsonDocument doc(256);
     String json;
 
     doc["state_topic"] = this->storage->getParameter(Parameter::MQTT_TOPIC_DISTANCE);
@@ -92,7 +92,7 @@ bool MqttClient::run()
 
 void MqttClient::sendDistance(float relative, float absolute, float measured)
 {
-    JsonDocument doc;
+    DynamicJsonDocument doc(128);
     String json;
 
     doc["relative"] = relative;

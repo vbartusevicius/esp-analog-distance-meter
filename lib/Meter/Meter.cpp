@@ -26,7 +26,7 @@ float Meter::measure()
     
     float current = voltageToCurrentMA(voltage);
     this->logger->info("Measurement taken. Raw: " + String(rawValue) + ", Voltage: " + String(voltage) + "V, Current: " + 
-                      String(current) + "mA, Sensor: " + String(connected ? "connected" : "disconnected") + 
+                      String(current) + "mA, Sensor: " + String(this->sensorConnected ? "connected" : "disconnected") + 
                       ", Distance: " + String(distance) + "m.");
 
     return distance;
