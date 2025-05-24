@@ -11,9 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('reset-btn').addEventListener('click', resetDevice);
     
     setupConfigToggle();
-    setInterval(() => {
-        requestStatus();
-    }, 10000);
+    requestStatus();
 });
 
 function setupConfigToggle() {

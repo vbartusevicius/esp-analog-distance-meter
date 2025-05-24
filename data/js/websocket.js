@@ -62,7 +62,21 @@ function handleWebSocketMessage(data) {
             }
             break;
         case 'stats_update':
-            updateUI(data);
+            // Process stats data sent from broadcastStats
+            // Extract only the data fields, excluding the event name
+            const statsData = {};
+            Object.keys(data).forEach(key => {
+                if (key !== 'event') {
+                    statsData[key] = data[key];
+                }
+            });
+            
+            // Log stats updates to the SystemLog
+            const statsMsg = `Stats update: Water level: ${data.water_level?.toFixed(2)}m (${(data.water_percent * 100)?.toFixed(1)}%), Distance: ${data.measured_distance?.toFixed(2)}m, Sensor: ${data.sensor_connected ? 'connected' : 'disconnected'}`;
+            addLogMessage(statsMsg);
+            
+            // Update the UI
+            updateUI(statsData);
             break;
         case 'sensor_reading':
             document.getElementById('water-level').textContent = `${data.water_level.toFixed(2)} m`;

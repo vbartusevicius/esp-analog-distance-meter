@@ -77,7 +77,7 @@ void setup()
     mqtt->begin();
 
     taskManager.schedule(repeatMillis(500), [] { wifi->run(); });
-    taskManager.schedule(repeatSeconds(1), [] { webApi->run(stats); });
+    taskManager.schedule(repeatMillis(1000), [] { webApi->run(stats); });
 
     if (!wifiConnected) {
         display.displayFirstStep(wifi->getAppName());
