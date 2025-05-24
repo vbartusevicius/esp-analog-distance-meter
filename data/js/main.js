@@ -33,58 +33,57 @@ function setupConfigToggle() {
 }
 
 function updateUI(data) {
-    if (data.water_level !== undefined) {
-        document.getElementById('water-level').textContent = `${data.water_level.toFixed(2)} m`;
-    }
+    // Sanitize data in one place - create a clean object with default values
+    const cleanData = {
+        water_level: isValidNumber(data.water_level) ? data.water_level.toFixed(2) + ' m' : 'N/A',
+        water_percent: isValidNumber(data.water_percent) ? (data.water_percent * 100).toFixed(1) + '%' : 'N/A',
+        measured_distance: isValidNumber(data.measured_distance) ? data.measured_distance.toFixed(2) + ' m' : 'N/A',
+        sensor_connected: data.sensor_connected !== undefined ? data.sensor_connected : false,
+        mqtt_connected: data.mqtt_connected !== undefined ? data.mqtt_connected : false,
+        wifi_network: data.wifi_network || 'Unknown',
+        wifi_signal: data.wifi_signal ? data.wifi_signal + ' dBm' : 'N/A',
+        ip_address: data.ip_address || 'Unknown',
+        uptime: data.uptime || 'N/A',
+        water_percent_value: isValidNumber(data.water_percent) ? data.water_percent : 0
+    };
     
-    if (data.water_percent !== undefined) {
-        document.getElementById('water-percent').textContent = `${(data.water_percent * 100).toFixed(1)}%`;
-    }
+    // Update all UI elements with clean data
+    document.getElementById('water-level').textContent = cleanData.water_level;
+    document.getElementById('water-percent').textContent = cleanData.water_percent;
+    document.getElementById('raw-measurement').textContent = cleanData.measured_distance;
     
-    if (data.measured_distance !== undefined) {
-        document.getElementById('raw-measurement').textContent = `${data.measured_distance.toFixed(2)} m`;
-    }
+    // Handle connection status indicators
+    document.getElementById('sensor-status').textContent = cleanData.sensor_connected ? 'Connected' : 'Disconnected';
+    document.getElementById('sensor-status').className = cleanData.sensor_connected ? 'stat-value connected' : 'stat-value disconnected';
     
-    if (data.measured_distance !== undefined) {
-        const sensorConnected = data.measured_distance > 0;
-        document.getElementById('sensor-status').textContent = sensorConnected ? 'Connected' : 'Disconnected';
-        document.getElementById('sensor-status').className = sensorConnected ? 'stat-value connected' : 'stat-value disconnected';
-    }
+    document.getElementById('mqtt-status').textContent = cleanData.mqtt_connected ? 'Connected' : 'Disconnected';
+    document.getElementById('mqtt-status').className = cleanData.mqtt_connected ? 'stat-value connected' : 'stat-value disconnected';
     
-    if (data.mqtt_connected !== undefined) {
-        document.getElementById('mqtt-status').textContent = data.mqtt_connected ? 'Connected' : 'Disconnected';
-        document.getElementById('mqtt-status').className = data.mqtt_connected ? 'stat-value connected' : 'stat-value disconnected';
-    }
+    // Update network information
+    document.getElementById('wifi-network').textContent = cleanData.wifi_network;
+    document.getElementById('wifi-signal').textContent = cleanData.wifi_signal;
+    document.getElementById('ip-address').textContent = cleanData.ip_address;
+    document.getElementById('uptime').textContent = cleanData.uptime;
     
-    if (data.wifi_network !== undefined) {
-        document.getElementById('wifi-network').textContent = data.wifi_network;
-    }
-    
-    if (data.wifi_signal !== undefined) {
-        document.getElementById('wifi-signal').textContent = `${data.wifi_signal} dBm`;
-    }
-    
-    if (data.ip_address !== undefined) {
-        document.getElementById('ip-address').textContent = data.ip_address;
-    }
-    
-    if (data.uptime !== undefined) {
-        document.getElementById('uptime').textContent = data.uptime;
-    }
-    
-    if (data.water_percent !== undefined) {
-        const fillElement = document.getElementById('water-fill');
-        fillElement.style.height = `${data.water_percent * 100}%`;
+    // Update water fill visualization
+    const fillElement = document.getElementById('water-fill');
+    if (fillElement) {
+        fillElement.style.height = `${cleanData.water_percent_value * 100}%`;
         
         fillElement.classList.remove('low', 'medium', 'high');
-        if (data.water_percent < 0.25) {
+        if (cleanData.water_percent_value < 0.25) {
             fillElement.classList.add('low');
-        } else if (data.water_percent < 0.75) {
+        } else if (cleanData.water_percent_value < 0.75) {
             fillElement.classList.add('medium');
         } else {
             fillElement.classList.add('high');
         }
     }
+}
+
+// Helper function to check if a value is a valid number
+function isValidNumber(value) {
+    return value !== undefined && value !== null && !isNaN(value);
 }
 
 function addLogMessage(message, autoScroll = false) {

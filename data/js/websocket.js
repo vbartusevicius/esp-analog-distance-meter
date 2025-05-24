@@ -55,15 +55,15 @@ function handleWebSocketMessage(data) {
                 logContainer.innerHTML = '';
                 
                 data.messages.forEach(message => {
-                    addLogMessage(message, false);
+                    if (message) {
+                        addLogMessage(message, false);
+                    }
                 });
                 
                 logContainer.scrollTop = logContainer.scrollHeight;
             }
             break;
         case 'stats_update':
-            // Process stats data sent from broadcastStats
-            // Extract only the data fields, excluding the event name
             const statsData = {};
             Object.keys(data).forEach(key => {
                 if (key !== 'event') {
@@ -71,8 +71,12 @@ function handleWebSocketMessage(data) {
                 }
             });
             
-            // Log stats updates to the SystemLog
-            const statsMsg = `Stats update: Water level: ${data.water_level?.toFixed(2)}m (${(data.water_percent * 100)?.toFixed(1)}%), Distance: ${data.measured_distance?.toFixed(2)}m, Sensor: ${data.sensor_connected ? 'connected' : 'disconnected'}`;
+            const waterLevel = data.water_level !== undefined && data.water_level !== null ? data.water_level.toFixed(2) + 'm' : 'N/A';
+            const waterPercent = data.water_percent !== undefined && data.water_percent !== null ? (data.water_percent * 100).toFixed(1) + '%' : 'N/A';
+            const distance = data.measured_distance !== undefined && data.measured_distance !== null ? data.measured_distance.toFixed(2) + 'm' : 'N/A';
+            const sensorStatus = data.sensor_connected !== undefined ? (data.sensor_connected ? 'connected' : 'disconnected') : 'unknown';
+            
+            const statsMsg = `Stats update: Water level: ${waterLevel} (${waterPercent}), Distance: ${distance}, Sensor: ${sensorStatus}`;
             addLogMessage(statsMsg);
             
             // Update the UI

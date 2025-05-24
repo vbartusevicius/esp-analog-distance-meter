@@ -13,7 +13,7 @@ class Meter
         
         static constexpr float MIN_CURRENT_MA = 4.0; 
         static constexpr float MAX_CURRENT_MA = 20.0;
-        static constexpr float FAULT_CURRENT_MA = 3.5;
+        static constexpr float FAULT_CURRENT_MA = 4.17;
 
         Logger* logger;
         Storage* storage;
