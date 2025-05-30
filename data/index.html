@@ -78,12 +78,14 @@
                         <input type="number" id="sensor-range" name="sensor_range" step="0.1" min="0">
                     </div>
                     <div class="form-group">
-                        <label for="distance-empty">Distance from Bottom to Sensor (cm):</label>
+                        <label for="distance-empty">Empty Tank Reading (cm):</label>
                         <input type="number" id="distance-empty" name="distance_empty" min="0">
+                        <small class="form-text">The sensor reading when tank is empty (readings ≤ this value = 0%)</small>
                     </div>
                     <div class="form-group">
-                        <label for="distance-full">Maximum Water Depth (cm):</label>
+                        <label for="distance-full">Full Tank Reading (cm):</label>
                         <input type="number" id="distance-full" name="distance_full" min="0">
+                        <small class="form-text">The sensor reading when tank is full (readings ≥ this value = 100%)</small>
                     </div>
                     <div class="form-group">
                         <label for="avg-sample-count">AVG Window Samples Count:</label>

@@ -56,24 +56,74 @@ void MqttClient::begin()
 
 void MqttClient::publishHomeAssistantAutoconfig()
 {
-    DynamicJsonDocument doc(256);
+    // Check if MQTT topic is set, otherwise set a default
+    String mqttTopic = this->storage->getParameter(Parameter::MQTT_TOPIC_DISTANCE);
+    if (mqttTopic.isEmpty()) {
+        // Set a default topic if none is configured
+        mqttTopic = "esp/analog_distance_meter/" + this->storage->getParameter(Parameter::MQTT_DEVICE) + "/state";
+        this->storage->saveParameter(Parameter::MQTT_TOPIC_DISTANCE, mqttTopic);
+        this->logger->info("Setting default MQTT topic: " + mqttTopic);
+    }
+    
+    String deviceId = this->storage->getParameter(Parameter::MQTT_DEVICE) + "_" + String(ESP.getChipId());
+    String configTopic = "homeassistant/sensor/" + deviceId + "/level/config";
+    
+    // Create a larger document to accommodate device info
+    DynamicJsonDocument doc(512);
     String json;
 
-    doc["state_topic"] = this->storage->getParameter(Parameter::MQTT_TOPIC_DISTANCE);
-    doc["value_template"] = "{{ ((value_json.relative | float) * 100) | round(2) }}";
+    // Basic sensor configuration
+    doc["state_topic"] = mqttTopic;
+    doc["value_template"] = "{{ ((value_json.relative | float) * 100) | round(1) }}";
     doc["unit_of_measurement"] = "%";
-    doc["name"] = "ESP ultrasonic distance meter";
-    doc["unique_id"] = this->storage->getParameter(Parameter::MQTT_DEVICE) + "_" + String(ESP.getChipId());
-    doc["object_id"] = "esp_distance_meter";
+    doc["name"] = "Water Level";
+    doc["unique_id"] = deviceId + "_level";
+    doc["device_class"] = "water";
+    doc["icon"] = "mdi:water-percent";
+    
+    // Device information for Home Assistant
+    JsonObject device = doc.createNestedObject("device");
+    device["identifiers"] = JsonArray().add(deviceId);
+    device["name"] = "ESP Analog Distance Meter";
+    device["model"] = "ESP8266";
+    device["manufacturer"] = "ESP";
+    device["sw_version"] = "1.0";
 
     serializeJson(doc, json);
-
-    client.publish(
-       "homeassistant/sensor/" + this->storage->getParameter(Parameter::MQTT_DEVICE) + "/config",
-        json,
-        true,
-        1
-    );
+    
+    // Publish with retain flag set to true for persistence
+    bool success = client.publish(configTopic, json);
+    
+    if (success) {
+        this->logger->info("Published Home Assistant autodiscovery config");
+    } else {
+        this->logger->warning("Failed to publish Home Assistant config");
+    }
+    
+    // Also create an absolute measurement sensor
+    configTopic = "homeassistant/sensor/" + deviceId + "/depth/config";
+    doc.clear();
+    
+    doc["state_topic"] = mqttTopic;
+    doc["value_template"] = "{{ value_json.absolute | round(2) }}";
+    doc["unit_of_measurement"] = "m";
+    doc["name"] = "Water Depth";
+    doc["unique_id"] = deviceId + "_depth";
+    doc["device_class"] = "distance";
+    doc["icon"] = "mdi:ruler";
+    
+    // Re-add device information
+    device = doc.createNestedObject("device");
+    device["identifiers"] = JsonArray().add(deviceId);
+    device["name"] = "ESP Analog Distance Meter";
+    device["model"] = "ESP8266";
+    device["manufacturer"] = "ESP";
+    device["sw_version"] = "1.0";
+    
+    json = "";
+    serializeJson(doc, json);
+    
+    client.publish(configTopic, json);
 }
 
 bool MqttClient::run()

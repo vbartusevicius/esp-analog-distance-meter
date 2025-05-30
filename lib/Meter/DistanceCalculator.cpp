@@ -10,10 +10,10 @@ DistanceCalculator::DistanceCalculator(Storage* storage)
  */
 float DistanceCalculator::getAbsolute(float sensorToWaterDistance)
 {
-    float sensorHeightFromBottom = atof(this->storage->getParameter(Parameter::DISTANCE_EMPTY).c_str()) / 100;
-    float waterLevel = sensorHeightFromBottom - sensorToWaterDistance;
-
-    return (waterLevel < 0) ? 0.0 : waterLevel; 
+    float relative = this->getRelative(sensorToWaterDistance);
+    float maxWaterDepth = atof(this->storage->getParameter(Parameter::DISTANCE_FULL).c_str()) / 100;
+    
+    return relative * maxWaterDepth;
 }
 
 /*
@@ -21,8 +21,15 @@ float DistanceCalculator::getAbsolute(float sensorToWaterDistance)
  */
 float DistanceCalculator::getRelative(float sensorToWaterDistance)
 {
-    float maxWaterDepth = atof(this->storage->getParameter(Parameter::DISTANCE_FULL).c_str()) / 100;
-    float currentWaterLevel = this->getAbsolute(sensorToWaterDistance);
+    float emptyDistance = atof(this->storage->getParameter(Parameter::DISTANCE_EMPTY).c_str()) / 100;
+    float fullDistance = atof(this->storage->getParameter(Parameter::DISTANCE_FULL).c_str()) / 100;
     
-    return (maxWaterDepth > 0) ? (currentWaterLevel / maxWaterDepth) : 0.0;
+    // Calculate percentage filled
+    if (sensorToWaterDistance <= emptyDistance) {
+        return 0.0;
+    } else if (sensorToWaterDistance >= fullDistance) {
+        return 1.0;
+    } else {
+        return (sensorToWaterDistance - emptyDistance) / (fullDistance - emptyDistance);
+    }
 }
