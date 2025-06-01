@@ -12,16 +12,21 @@ class MqttClient
         Logger* logger;
         MQTTClient client;
         unsigned long lastReconnectAttempt;
+        unsigned long reconnectInterval;
+        unsigned long lastActivityCheck;
+        unsigned long lastMqttActivity;
+        bool previouslyConnected;
+        const unsigned int KEEPALIVE_INTERVAL = 15000; // 15 seconds
+
+        bool connectMqtt();
+        void updateActivityTimestamp();
+        void publishHomeAssistantAutoconfig();
 
     public:
         MqttClient(Storage* storage, Logger* logger);
         void begin();
-        bool connect();
         bool run();
         void sendDistance(float relative, float absolute, float measured);
-
-    private:
-        void publishHomeAssistantAutoconfig();
 };
 
 #endif
