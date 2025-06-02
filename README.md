@@ -21,12 +21,14 @@ Final result
 
 ## 4-20mA to 0-3.3V Conversion Circuit
 
-If you need to build your own 4-20mA to 0-3.3V converter circuit, here's how you can do it:
+Most industrial 4-20mA sensors, including the SWK-LT100, require a 24VDC power supply to operate correctly. The sensor acts as a variable current sink in the loop, where the current drawn (4-20mA) represents the measured value. 
+
+If you need to build your own 4-20mA to 0-3.3V converter circuit to connect this sensor to an ESP8266, here's how you can do it:
 
 ### Components needed
 
 #### For Minimal Circuit
-* 160Ω or 150Ω precision resistor (standard E24 value, 1% tolerance recommended)
+* 160Ω or 150Ω precision resistor (standard E24 value, 1% tolerance recommended, 1/4W or higher)
 * Alternative: 150Ω + 10Ω in series (equals 160Ω)
 
 #### Additional Components for Enhanced Protection Circuit
