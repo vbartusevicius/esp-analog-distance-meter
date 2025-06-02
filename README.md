@@ -10,19 +10,88 @@ This project was inspired by [WaterLevelSensorMQTT](https://github.com/portfedh/
 * NodeMCU ESP8266 Development Board ~4EUR
   * Recommend buying the one with built-in 0.96in display
 * Any analog sensor, I used SWK-LT100 ~40EUR
-* 4-20mA to 3V3 signal converter or 0-10V signal converter ~3EUR
 
 ![ESP8266](./doc/nodemcu.png)
 ![JSN-SR04T](./doc/sensor.png)
 
-4-20mA to 0-3V3 signal converters
-
-![](./doc/signal_converter_1.png)
-![](./doc/signal_converter_2.png)
 
 Final result
 
 ![](./doc/final_result.jpg)
+
+## 4-20mA to 0-3.3V Conversion Circuit
+
+If you need to build your own 4-20mA to 0-3.3V converter circuit, here's how you can do it:
+
+### Components needed
+
+#### For Minimal Circuit
+* 160Ω or 150Ω precision resistor (standard E24 value, 1% tolerance recommended)
+* Alternative: 150Ω + 10Ω in series (equals 160Ω)
+
+#### Additional Components for Enhanced Protection Circuit
+* 10nF capacitor for noise filtering
+* 3.6V Zener diode for overvoltage protection
+
+### Circuit Schematics
+
+#### Minimal Circuit
+
+```
+4-20mA Sensor Loop
+     |   |
+    (-) (+) ----+----------> To ESP8266 ADC
+     |          |
+     |         .-.
+     |         | | 160Ω
+     |         '-'
+     |          |
+    (-) (+) ----+----------> To ESP8266 GND
+```
+
+This minimal circuit is all you need to convert a 4-20mA current signal to a voltage suitable for the ESP8266 analog input.
+
+#### Enhanced Protection Circuit
+
+```
+4-20mA Sensor Loop
+     |   |
+    (-) (+) ----+---------+--------+-------> To ESP8266 ADC
+     |          |         |        |
+     |         .-.        |        | 
+     |         | | 160Ω  === 10nF  └-Z<|-┐ Vz 3.6V
+     |         '-'        |              |
+     |          |         |              |
+    (-) (+) ----+---------+--------------+-> To ESP8266 GND
+```
+
+### How it works
+
+#### Basic Circuit
+The circuit uses Ohm's Law: V = I × R
+
+With a 160Ω precision resistor:
+* 4mA × 160Ω = 0.64V (lower range)
+* 20mA × 160Ω = 3.2V (upper range)
+
+With a 150Ω precision resistor:
+* 4mA × 150Ω = 0.6V (lower range)
+* 20mA × 150Ω = 3.0V (upper range) - slightly lower than ESP8266's 3.3V ADC range
+
+Both standard resistor values provide a good mapping to the 0-3.3V input range of the ESP8266's analog pin. The 160Ω resistor stays safely under the maximum ADC voltage, while the 180Ω resistor provides slightly better resolution but may exceed the maximum input voltage at 20mA.
+
+#### Protection Components in the Enhanced Circuit
+
+1. **10nF Capacitor**: Filters out high-frequency noise from the sensor signal and stabilizes the ADC input
+
+2. **3.6V Zener Diode**: Protects against overvoltage conditions by clamping the voltage to 3.6V, preventing damage to the ESP8266's analog input
+
+### Notes
+
+* Ensure precise resistor values for accurate readings
+* Keep wires short to minimize electrical noise
+* For industrial applications, consider adding additional protection like an optocoupler
+* If your sensor provides more than 20mA in fault conditions, add a 3.6V Zener diode for overvoltage protection
 
 ## Setup
 
