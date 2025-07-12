@@ -49,6 +49,7 @@ void WebApi::setupApiEndpoints() {
         doc["mqtt_user"] = this->storage->getParameter(Parameter::MQTT_USER, "");
         doc["mqtt_pass"] = this->storage->getParameter(Parameter::MQTT_PASS, "");
         doc["mqtt_device"] = this->storage->getParameter(Parameter::MQTT_DEVICE, "esp_distance_meter");
+        doc["mqtt_topic"] = this->storage->getParameter(Parameter::MQTT_TOPIC_DISTANCE, "esp_distance_meter/stat/distance");
         
         serializeJson(doc, *response);
         request->send(response);
@@ -132,6 +133,11 @@ void WebApi::setupApiEndpoints() {
                 if (jsonObj.containsKey("mqtt_device")) {
                     String value = jsonObj["mqtt_device"].as<String>();
                     this->storage->saveParameter(Parameter::MQTT_DEVICE, value);
+                }
+
+                if (jsonObj.containsKey("mqtt_topic")) {
+                    String value = jsonObj["mqtt_topic"].as<String>();
+                    this->storage->saveParameter(Parameter::MQTT_TOPIC_DISTANCE, value);
                 }
                 
                 this->logger->info("Configuration saved");

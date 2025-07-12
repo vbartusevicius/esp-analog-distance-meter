@@ -97,7 +97,6 @@ void MqttClient::publishHomeAssistantAutoconfig()
     doc["unit_of_measurement"] = "%";
     doc["name"] = "Water Level";
     doc["unique_id"] = deviceId + "_level";
-    doc["device_class"] = "water";
     doc["icon"] = "mdi:water-percent";
     doc["state_class"] = "measurement";
 
